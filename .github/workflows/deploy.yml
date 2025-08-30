@@ -2,16 +2,16 @@ name: Deploy to Heroku
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # <— important
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -29,8 +29,10 @@ jobs:
         run: |
           echo "machine api.heroku.com login _ password $HEROKU_API_KEY" > ~/.netrc
           echo "machine git.heroku.com login _ password $HEROKU_API_KEY" >> ~/.netrc
+          chmod 600 ~/.netrc
 
       - name: Deploy to Heroku
         run: |
+          git remote remove heroku 2>/dev/null || true
           git remote add heroku https://git.heroku.com/loan-default-stutteringemo.git
-          git push heroku main --force
+          git push heroku HEAD:main --force
