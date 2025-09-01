@@ -1,0 +1,36 @@
+﻿---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loan-default-api
+  labels: { app: loan-default-api }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: loan-default-api } }
+  template:
+    metadata: { labels: { app: loan-default-api } }
+    spec:
+      containers:
+        - name: api
+          image: loan-default:latest
+          imagePullPolicy: IfNotPresent
+          ports: [ { containerPort: 8080 } ]
+          readinessProbe: { httpGet: { path: /health, port: 8080 }, initialDelaySeconds: 5, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /health, port: 8080 }, initialDelaySeconds: 10, periodSeconds: 15 }
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: loan-default-svc
+  labels: { app: loan-default-api }
+spec:
+  selector: { app: loan-default-api }
+  type: NodePort
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8080
+      nodePort: 30080
