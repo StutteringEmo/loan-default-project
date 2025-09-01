@@ -25,13 +25,8 @@ COPY model.pkl /app/model.pkl
 COPY schema.json /app/schema.json
 COPY sample_request.json /app/sample_request.json
 
-# -------- Runtime env --------
-# The Flask app expects MODEL_PATH env; we point it at /app/model.pkl
-ENV MODEL_PATH=/app/model.pkl \
-    PORT=8080
+# ------- Runtime env --------
+ENV MODEL_PATH=/app/model.pkl
 
-EXPOSE 8080
-
-# -------- Entrypoint (gunicorn, production grade) --------
-# If your Flask app instance is named `app` inside app/app.py, the WSGI target is app.app:app
-CMD ["gunicorn", "app.app:app", "--bind", "0.0.0.0:8080", "--workers=2", "--threads=4", "--timeout=60"]
+# Heroku sets $PORT dynamically; fall back to 8080 for local testing
+CMD ["gunicorn", "app.app:app", "--bind", "0.0.0.0:${PORT:-8080}", "--workers=2", "--threads=4", "--timeout=60"]
