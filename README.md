@@ -1,10 +1,9 @@
 # Loan Default Prediction with SageMaker  
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue.svg)](https://www.python.org/)  
-[![Scikit-learn](https://img.shields.io/badge/Scikit--learn-1.5.1-orange.svg)](https://scikit-learn.org/stable/)  
-[![AWS SageMaker](https://img.shields.io/badge/AWS-SageMaker-yellow.svg)](https://aws.amazon.com/sagemaker/)  
-[![Kubernetes](https://img.shields.io/badge/Kubernetes-Deployment-blue.svg)](https://kubernetes.io/)  
-[![Heroku](https://img.shields.io/badge/Heroku-CI%2FCD-purple.svg)](https://www.heroku.com/)  
+[![CI](https://github.com/stutteringemo/loan-default-project/actions/workflows/ci.yml/badge.svg)](https://github.com/stutteringemo/loan-default-project/actions/workflows/ci.yml)
+![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-green)
+
 
 This project demonstrates an end-to-end **machine learning pipeline** for predicting loan defaults.  
 The workflow covers everything from **local training → container packaging → SageMaker deployment → Kubernetes scaling**.  
