@@ -1,4 +1,4 @@
-﻿name: CI/CD — Docker Hub + Heroku
+name: CI/CD — Docker Hub + Heroku
 
 on:
   push:
@@ -37,29 +37,23 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-            ${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env. IMAGE_NAME }}:${{ github.sha }}
 
       # ---------- Deploy to Heroku Container Registry ----------
       - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
+        run: curl https://cli-assets.heroku.com/install.sh | sh
 
-      - name: Heroku Container login
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
+      # Most reliable way to auth in CI
+      - name: Login to Heroku Container Registry
+        run: echo "${{ secrets.HEROKU_API_KEY }}" | docker login --username=_ --password-stdin registry.heroku.com
 
       - name: Tag image for Heroku
         run: |
           docker pull ${{ env.IMAGE_NAME }}:latest
-          docker tag ${{ env.IMAGE_NAME }}:latest registry.heroku.com/${{ env.HEROKU_APP }}/web
+          docker tag  ${{ env.IMAGE_NAME }}:latest registry.heroku.com/${{ env.HEROKU_APP }}/web
 
       - name: Push image to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: docker push registry.heroku.com/${{ env.HEROKU_APP }}/web
 
       - name: Release on Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: heroku container:release web -a ${{ env.HEROKU_APP }}
