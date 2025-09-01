@@ -143,13 +143,40 @@ _To be completed after your endpoint stabilizes._
 - A published Docker image (from Docker Hub or GHCR) that matches your app
 
 **Steps**
-1. Update the image name in your YAML (e.g., `stutteringemo/loan-default:latest`).  
-2. Apply:  
-   `kubectl apply -f k8s/deployment.yaml`
-3. Expose (if not in the YAML):  
-   `kubectl expose deployment loan-default --type=LoadBalancer --port=80 --target-port=8080`
-4. Get external IP:  
-   `kubectl get svc`
+1. Create a local cluster:
+```bash
+kind create cluster --name loan --image kindest/node:v1.32.2 --wait 180s
+```
+2. Build & load your image into the cluster:
+```bash
+docker build -t loan-default:latest .
+kind load docker-image loan-default:latest --name loan
+```
+
+3. Apply the Kubernetes configuration:
+```bash
+kubectl apply -f k8s/loan-default.yaml
+kubectl rollout status deploy/loan-default-api
+```
+
+4. Access the app:
+```bash
+# easiest for recording:
+kubectl port-forward svc/loan-default-svc 8080:80
+```
+- Open in browser: http://localhost:8080     (health: /health, FastAPI docs: /docs)
+
+5. Verify:
+```bash
+kubectl get pods -o wide
+kubectl get svc loan-default-svc
+curl http://localhost:8080/health
+```
+
+6. Cleanup:
+```bash
+kubectl delete -f k8s/loan-default.yaml
+kind delete cluster --name loan
+```
 
 ---
-
