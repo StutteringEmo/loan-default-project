@@ -87,6 +87,8 @@ The workflow covers everything from **local training → container packaging →
 
 ### 3) Heroku (Docker + GitHub CI/CD)
 
+- Heroku LIVE APP: https://loan-default-stutteringemo-17af9b646602.herokuapp.com
+
 **Files you need**
 - Everything from **Docker (Local)** plus:
 - `.github/workflows/deploy.yml`  ← GitHub Actions workflow
