@@ -1,0 +1,180 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Loan Default Predictor</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container">
+    <span class="navbar-brand">Loan Default Predictor</span>
+    <div class="d-flex gap-3">
+      <a class="nav-link text-white-50" href="{{ url_for('health') }}">/health</a>
+      <a class="nav-link text-white-50" href="https://github.com/StutteringEmo/loan-default-project" target="_blank">GitHub repo</a>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-4">
+  <p class="lead">
+    Enter borrower features and click <strong>Predict</strong>. Fields are generated from your
+    <code>schema.json</code>.
+  </p>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+
+      {% if properties and fields and fields|length > 0 %}
+        <form id="featureForm" class="row g-4">
+          {% for f in fields %}
+            {% set meta = properties[f] %}
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">{{ meta.get('title', f.replace('_',' ').title()) }}</label>
+
+              {% if meta.get('enum') %}
+                <select class="form-select" name="{{ f }}" id="{{ f }}">
+                  {% for opt in meta['enum'] %}
+                    <option value="{{ opt }}">{{ opt.replace('_',' ').title() }}</option>
+                  {% endfor %}
+                </select>
+              {% else %}
+                <div class="input-group">
+                  {% if meta.get('unit') in ['$', '%'] %}
+                    <span class="input-group-text">{{ meta['unit'] }}</span>
+                  {% endif %}
+                  <input
+                    class="form-control"
+                    type="{{ 'number' if meta.get('type') in ['integer','number'] else 'text' }}"
+                    name="{{ f }}" id="{{ f }}"
+                    {% if meta.get('minimum') is defined %}min="{{ meta['minimum'] }}"{% endif %}
+                    {% if meta.get('maximum') is defined %}max="{{ meta['maximum'] }}"{% endif %}
+                    {% if meta.get('step') is defined %}step="{{ meta['step'] }}"{% endif %}
+                    placeholder="Enter {{ meta.get('title', f.replace('_',' ').title()) }}"
+                  />
+                </div>
+              {% endif %}
+
+              {% if meta.get('description') %}
+                <div class="form-text">{{ meta['description'] }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </form>
+
+        <div class="d-flex gap-2 mt-2">
+          <button id="btnPredict" class="btn btn-primary">Predict</button>
+          <button id="btnReset" class="btn btn-outline-secondary">Reset</button>
+        </div>
+
+      {% else %}
+        <div class="alert alert-warning">
+          No <code>schema.json</code> found. You can still paste raw JSON below.
+        </div>
+
+        <textarea id="rawJson" class="form-control" rows="12">{{ sample_json }}</textarea>
+        <div class="d-flex gap-2 mt-3">
+          <button id="btnPredict" class="btn btn-primary">Predict</button>
+          <button id="btnSample" class="btn btn-outline-secondary">Use Sample</button>
+          <button id="btnReset" class="btn btn-outline-secondary" disabled>Reset</button>
+        </div>
+      {% endif %}
+
+      <div id="result" class="alert d-none mt-3"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Bootstrap JS (needed for tooltip) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const result = document.getElementById('result');
+  const form   = document.getElementById('featureForm');
+  const btnPredict = document.getElementById('btnPredict');
+  const btnReset   = document.getElementById('btnReset');
+  const btnSample  = document.getElementById('btnSample');
+  const rawJsonEl  = document.getElementById('rawJson');
+
+  function initTooltips(scope=document) {
+    const triggers = scope.querySelectorAll('[data-bs-toggle="tooltip"]');
+    triggers.forEach(el => new bootstrap.Tooltip(el));
+  }
+
+  function showOk(p, y){
+    result.className = 'alert ' + (y ? 'alert-danger' : 'alert-success');
+    result.innerHTML = `
+      <strong>Prediction:</strong> ${y ? 'Will Default' : 'Will Not Default'}<br>
+      <strong>Risk of Default</strong>
+      <span class="ms-1 text-muted"
+            role="img"
+            aria-label="info"
+            data-bs-toggle="tooltip"
+            data-bs-placement="right"
+            title="The estimated chance that this borrower will default on the loan (miss payments or fail to repay). Lower is better.">
+        ⓘ
+      </span>
+      : ${(p*100).toFixed(2)}%
+    `;
+    initTooltips(result);
+  }
+
+  function showErr(msg){
+    result.className = 'alert alert-danger';
+    result.textContent = msg;
+  }
+
+  btnPredict?.addEventListener('click', async () => {
+    result.className = 'alert d-none'; result.textContent = '';
+    let payload;
+
+    {% if properties and fields and fields|length > 0 %}
+      const props  = {{ properties|tojson }};
+      const fields = {{ fields|tojson }};
+      payload = {};
+      fields.forEach(f => {
+        const meta = props[f] || {};
+        const el   = document.getElementById(f);
+        let val    = el.value;
+        if (meta.type === 'number' || meta.type === 'integer') {
+          val = (val === '' || val === null) ? null : Number(val);
+        }
+        payload[f] = val;
+      });
+    {% else %}
+      try { payload = JSON.parse(rawJsonEl.value); }
+      catch { return showErr('Invalid JSON.'); }
+    {% endif %}
+
+    try {
+      const resp = await fetch('{{ url_for("predict") }}', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      const data = await resp.json();
+      const rows = Array.isArray(data) ? data : [data];
+      const p = rows[0].prob_default ?? 0;
+      const y = rows[0].pred_default ?? 0;
+      showOk(p, y);
+    } catch (e) {
+      showErr('Prediction failed: ' + e.message);
+    }
+  });
+
+  btnReset?.addEventListener('click', () => form?.reset());
+
+  btnSample?.addEventListener('click', () => {
+    rawJsonEl.value = {{ sample_json|tojson }};
+  });
+
+  // Initialize any tooltips that are present on initial load
+  initTooltips(document);
+});
+</script>
+</body>
+</html>

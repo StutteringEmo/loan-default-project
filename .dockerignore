@@ -1,7 +1,18 @@
-﻿.git
+﻿# Python
 __pycache__/
 *.pyc
+
+# Notebooks / data
 notebooks/
 data/
+*.csv
 *.ipynb_checkpoints/
-.env
+
+# VCS / OS crap
+.git/
+.gitignore
+.DS_Store
+
+# Build output
+dist/
+build/

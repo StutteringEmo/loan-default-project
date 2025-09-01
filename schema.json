@@ -1,0 +1,77 @@
+﻿{
+  "title": "Loan Default Inputs",
+  "type": "object",
+  "properties": {
+    "age": {
+      "title": "Age",
+      "type": "integer",
+      "minimum": 18,
+      "maximum": 100,
+      "step": 1,
+      "description": "Borrower age in years"
+    },
+    "income": {
+      "title": "Monthly Income",
+      "type": "number",
+      "minimum": 0,
+      "step": 100,
+      "unit": "$",
+      "description": "Gross monthly income in USD"
+    },
+    "debt_ratio": {
+      "title": "Debt Ratio",
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "step": 0.1,
+      "unit": "%",
+      "description": "Percentage of monthly income already committed to debt payments"
+    },
+    "open_credit_lines": {
+      "title": "Open Credit Lines",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 50,
+      "step": 1,
+      "description": "Number of active credit lines (e.g., credit cards, personal loans, mortgages)"
+    },
+    "past_due_30_59": {
+      "title": "Past-Due Payments (30–59 days)",
+      "type": "integer",
+      "minimum": 0,
+      "step": 1,
+      "description": "Number of times in the last 2 years the borrower was 30–59 days late on a payment"
+    },
+    "loan_amount": {
+      "title": "Loan Amount",
+      "type": "number",
+      "minimum": 0,
+      "step": 100,
+      "unit": "$",
+      "description": "Total loan amount requested by the borrower (in USD)"
+    },
+    "purpose": {
+      "title": "Purpose",
+      "type": "string",
+      "enum": [
+        "debt_consolidation",
+        "home_improvement",
+        "medical",
+        "major_purchase",
+        "small_business",
+        "vacation",
+        "other"
+      ],
+      "description": "Primary purpose for requesting the loan"
+    }
+  },
+  "required": [
+    "age",
+    "income",
+    "debt_ratio",
+    "open_credit_lines",
+    "past_due_30_59",
+    "loan_amount",
+    "purpose"
+  ]
+}

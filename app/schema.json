@@ -1,0 +1,19 @@
+﻿{
+  "title": "Loan Default Inputs",
+  "type": "object",
+  "properties": {
+    "age":           { "title": "Age",                 "type": "integer", "minimum": 18, "maximum": 100, "step": 1,   "description": "Borrower age in years" },
+    "income":        { "title": "Monthly Income",      "type": "number",  "minimum": 0,  "step": 100, "unit": "$",     "description": "Gross monthly income" },
+    "debt_ratio":    { "title": "Debt Ratio",          "type": "number",  "minimum": 0,  "maximum": 100, "step": 0.1, "unit": "%", "description": "Debt payments as % of income" },
+    "open_credit_lines": { "title": "Open Credit Lines", "type": "integer", "minimum": 0, "maximum": 50,  "step": 1,   "description": "Number of open credit lines" },
+    "past_due_30_59":   { "title": "Past-Due (30–59d)", "type": "integer", "minimum": 0, "maximum": 20,  "step": 1,   "description": "Past-due payments in last 2 years" },
+    "loan_amount":   { "title": "Loan Amount",         "type": "number",  "minimum": 0,  "step": 100, "unit": "$" },
+    "purpose": {
+      "title": "Purpose",
+      "type": "string",
+      "enum": ["debt_consolidation","home_improvement","medical","major_purchase","small_business","vacation","other"],
+      "description": "Primary purpose of the loan"
+    }
+  },
+  "required": ["age","income","debt_ratio","open_credit_lines","loan_amount","purpose"]
+}

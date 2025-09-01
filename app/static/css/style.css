@@ -1,0 +1,21 @@
+﻿/* Soft card feel */
+.card { border: 0; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+label.form-label { font-weight: 600; }
+
+/* Unit addons */
+.input-group-text { min-width: 2.25rem; justify-content: center; }
+
+/* Sticky actions on small screens */
+.sticky-actions {
+  position: sticky;
+  bottom: 0;
+  background: var(--bs-body-bg);
+  padding: .5rem 0;
+  z-index: 10;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Optional: tighter container on xl */
+@media (min-width: 1200px) {
+  .container { max-width: 980px; }
+}
