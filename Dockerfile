@@ -28,5 +28,5 @@ COPY sample_request.json /app/sample_request.json
 # ------- Runtime env --------
 ENV MODEL_PATH=/app/model.pkl
 
-# Heroku sets $PORT dynamically; fall back to 8080 for local testing
-CMD ["gunicorn", "app.app:app", "--bind", "0.0.0.0:${PORT:-8080}", "--workers=2", "--threads=4", "--timeout=60"]
+# Use shell form so $PORT expands on Heroku (fallback to 8080 locally)
+CMD gunicorn app.app:app --bind 0.0.0.0:${PORT:-8080} --workers=2 --threads=4 --timeout=60
